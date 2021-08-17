@@ -143,7 +143,7 @@ var run = function () { return __awaiter(void 0, void 0, void 0, function () {
                 core.info("PR " + prNumber + ": early submission");
                 return [2 /*return*/];
             case 9:
-                if (!(new Date(subject.dueDate).getTime() > new Date(pr.updated_at).getTime())) return [3 /*break*/, 11];
+                if (!(new Date(subject.dueDate).getTime() < new Date(pr.updated_at).getTime())) return [3 /*break*/, 11];
                 return [4 /*yield*/, exports.wrongSubmission(client, prNumber, config.subjects, [
                         !!pr.user && "\uD83D\uDC4B \uC548\uB155\uD558\uC138\uC694! " + pr.user.login + "\uB2D8!",
                         "* \uD83D\uDE2D \uC548\uD0C0\uAE5D\uC9C0\uB9CC \uC11C\uBE0C\uC81D\uD2B8 \uC81C\uCD9C\uAE30\uAC04\uC774 \uC9C0\uB0AC\uC2B5\uB2C8\uB2E4.",

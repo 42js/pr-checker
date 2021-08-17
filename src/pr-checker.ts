@@ -90,7 +90,7 @@ export const run = async () => {
     }
 
     if (
-      new Date(subject.dueDate).getTime() > new Date(pr.updated_at).getTime()
+      new Date(subject.dueDate).getTime() < new Date(pr.updated_at).getTime()
     ) {
       await wrongSubmission(
         client,
