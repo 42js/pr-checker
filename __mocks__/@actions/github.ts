@@ -27,6 +27,7 @@ const mockApi = {
           user: {
             id: 42,
           },
+          labels: [],
         },
       }),
       listFiles: {

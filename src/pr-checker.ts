@@ -32,10 +32,17 @@ export const run = async () => {
     const changedFiles = await getChnageFiles(client, prNumber);
 
     const subjects: string[] = [];
+    const removeLabels: string[] = [];
+
+    if (pr.labels.find((label) => label.name === "✅ 정상적인 제출")) {
+      removeLabels.push("✅ 정상적인 제출");
+    }
 
     for (const [key, subject] of Object.entries(config.subjects)) {
       if (isMatch(subject.glob, changedFiles)) {
         subjects.push(key);
+      } else if (pr.labels.find((label) => label.name === key)) {
+        removeLabels.push(key);
       }
     }
 
@@ -43,7 +50,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        config.subjects,
+        removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `* Subject에 관련되지 않은 PR를 제출 하셨습니다.`,
@@ -57,7 +64,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        config.subjects,
+        removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `* PR 하나당 하나의 Subject에 관련된 내용만 제출가능합니다!`,
@@ -72,11 +79,11 @@ export const run = async () => {
 
     const subject = config.subjects[subjects[0]];
 
-    if (new Date(subject.asOfDate).getTime() > new Date().getTime()) {
+    if (Date.parse(subject.asOfDate) > Date.now()) {
       await wrongSubmission(
         client,
         prNumber,
-        config.subjects,
+        removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `* Subject 제출 기간이 아닙니다! 아래의 정보를 확인 해주세요! `,
@@ -89,13 +96,11 @@ export const run = async () => {
       return;
     }
 
-    if (
-      new Date(subject.dueDate).getTime() < new Date(pr.updated_at).getTime()
-    ) {
+    if (Date.parse(subject.dueDate) < Date.parse(pr.updated_at)) {
       await wrongSubmission(
         client,
         prNumber,
-        config.subjects,
+        removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `* 😭 안타깝지만 서브젝트 제출기간이 지났습니다.`,
@@ -131,12 +136,11 @@ export const run = async () => {
 export const wrongSubmission = async (
   client: IClient,
   prNumber: number,
-  subjects: { [key: string]: ISubject },
+  removeLabels: string[],
   body: string
 ) => {
-  await removeLabel(client, prNumber, "✅ 정상적인 제출");
-  for (const subject of Object.keys(subjects)) {
-    await removeLabel(client, prNumber, subject);
+  for (const label of removeLabels) {
+    removeLabel(client, prNumber, label);
   }
   await addLabels(client, prNumber, ["❌ 비정상 제출"]);
   await addComment(client, prNumber, body);
