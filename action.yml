@@ -10,6 +10,12 @@ inputs:
     description: "The path for the pr-checker configurations"
     default: ".github/labeler.yml"
     required: false
+  currect-label:
+    description: "정상적인 제출일 때 붙여줄 라벨"
+    required: true
+  wrong-label:
+    description: "비 정상적인 제출일 때 붙여줄 라벨"
+    required: true
 
 runs:
   using: "node12"

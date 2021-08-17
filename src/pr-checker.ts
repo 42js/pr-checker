@@ -2,11 +2,13 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import minimatch from "minimatch";
-import { IConfigObject, IClient, ISubject } from "./types";
+import { IConfigObject, IClient } from "./types";
 
 export const run = async () => {
   try {
     const token = core.getInput("repo-token", { required: true });
+    const currectLabel = core.getInput("currect-label", { required: true });
+    const wrongLabel = core.getInput("wrong-label", { required: true });
     const configPath = core.getInput("configuration-path", { required: true });
 
     const prNumber = getPrNumber();
@@ -34,8 +36,8 @@ export const run = async () => {
     const subjects: string[] = [];
     const removeLabels: string[] = [];
 
-    if (pr.labels.find((label) => label.name === "✅ 정상적인 제출")) {
-      removeLabels.push("✅ 정상적인 제출");
+    if (pr.labels.find((label) => label.name === currectLabel)) {
+      removeLabels.push(currectLabel);
     }
 
     for (const [key, subject] of Object.entries(config.subjects)) {
@@ -50,10 +52,11 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
+        [wrongLabel, "wrong-path"],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-          `* Subject에 관련되지 않은 PR를 제출 하셨습니다.`,
+          `- Subject에 관련되지 않은 PR를 제출 하셨습니다.`,
         ].join("\n")
       );
       core.info(`PR ${prNumber}: wrong submission (path)`);
@@ -64,12 +67,13 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
+        [wrongLabel, "too-many-submissions"],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-          `* PR 하나당 하나의 Subject에 관련된 내용만 제출가능합니다!`,
-          `* 제출하시려는 Subject는 아래와 같습니다.`,
-          ` - ${subjects.join(", ")}`,
+          `- PR 하나당 하나의 Subject에 관련된 내용만 제출가능합니다!`,
+          `- 제출하시려는 Subject는 아래와 같습니다.`,
+          `  - ${subjects.join(", ")}`,
         ].join("\n")
       );
 
@@ -83,13 +87,14 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
+        [wrongLabel, "early-submission"],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-          `* Subject 제출 기간이 아닙니다! 아래의 정보를 확인 해주세요! `,
-          `* PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-          `* PR 제출 시각: ${pr.created_at}`,
-          `* PR 마지막 업데이트 시각: ${pr.updated_at}`,
+          `- Subject 제출 기간이 아닙니다! 아래의 정보를 확인 해주세요! `,
+          `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
+          `- PR 제출 시각: ${pr.created_at}`,
+          `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
         ].join("\n")
       );
       core.info(`PR ${prNumber}: early submission`);
@@ -100,31 +105,32 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
+        [wrongLabel, "late-submission"],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-          `* 😭 안타깝지만 서브젝트 제출기간이 지났습니다.`,
-          `* 아래의 정보를 확인 해주세요! `,
-          `* PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-          `* PR 제출 시각: ${pr.created_at}`,
-          `* PR 마지막 업데이트 시각: ${pr.updated_at}`,
+          `- 😭 안타깝지만 서브젝트 제출기간이 지났습니다.`,
+          `- 아래의 정보를 확인 해주세요! `,
+          `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
+          `- PR 제출 시각: ${pr.created_at}`,
+          `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
         ].join("\n")
       );
-      core.info(`PR ${prNumber}: early submission`);
+      core.info(`PR ${prNumber}: late submission`);
       return;
     }
 
-    await addLabels(client, prNumber, [subjects[0], "✅ 정상적인 제출"]);
+    await addLabels(client, prNumber, [subjects[0], currectLabel]);
 
     await addComment(
       client,
       prNumber,
       [
         !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-        `* 🎉 정상적으로 제출 되셨습니다! 평가 매칭을 기달려주세요!`,
-        `* PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-        `* PR 제출 시각: ${pr.created_at}`,
-        `* PR 마지막 업데이트 시각: ${pr.updated_at}`,
+        `- 🎉 정상적으로 제출 되셨습니다! 평가 매칭을 기달려주세요!`,
+        `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
+        `- PR 제출 시각: ${pr.created_at}`,
+        `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
       ].join("\n")
     );
   } catch (error) {
@@ -136,13 +142,14 @@ export const run = async () => {
 export const wrongSubmission = async (
   client: IClient,
   prNumber: number,
+  labels: string[],
   removeLabels: string[],
   body: string
 ) => {
   for (const label of removeLabels) {
     removeLabel(client, prNumber, label);
   }
-  await addLabels(client, prNumber, ["❌ 비정상 제출"]);
+  await addLabels(client, prNumber, labels);
   await addComment(client, prNumber, body);
   await closePR(client, prNumber);
 };
