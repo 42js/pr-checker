@@ -3,6 +3,15 @@ import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import minimatch from "minimatch";
 import { IConfigObject, IClient } from "./types";
+import date from "date-and-time";
+// @ts-ignore
+import ko from "date-and-time/locale/ko";
+
+date.locale(ko);
+
+export const toLocalString = (datetime: string): string => {
+  return date.format(new Date(datetime), "YYYY-MM-DD HH:mm:ss");
+};
 
 export const run = async () => {
   try {
@@ -92,9 +101,9 @@ export const run = async () => {
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `- Subject 제출 기간이 아닙니다! 아래의 정보를 확인 해주세요! `,
-          `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-          `- PR 제출 시각: ${pr.created_at}`,
-          `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
+          `- PR 제출 기간: ${toLocalString(subject.asOfDate)} ~ ${toLocalString(subject.dueDate)}`,
+          `- PR 제출 시각: ${toLocalString(pr.created_at)}`,
+          `- PR 마지막 업데이트 시각: ${toLocalString(pr.updated_at)}`,
         ].join("\n")
       );
       core.info(`PR ${prNumber}: early submission`);
@@ -111,9 +120,9 @@ export const run = async () => {
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
           `- 😭 안타깝지만 서브젝트 제출기간이 지났습니다.`,
           `- 아래의 정보를 확인 해주세요! `,
-          `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-          `- PR 제출 시각: ${pr.created_at}`,
-          `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
+          `- PR 제출 기간: ${toLocalString(subject.asOfDate)} ~ ${toLocalString(subject.dueDate)}`,
+          `- PR 제출 시각: ${toLocalString(pr.created_at)}`,
+          `- PR 마지막 업데이트 시각: ${toLocalString(pr.updated_at)}`,
         ].join("\n")
       );
       core.info(`PR ${prNumber}: late submission`);
@@ -128,9 +137,9 @@ export const run = async () => {
       [
         !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
         `- 🎉 정상적으로 제출 되셨습니다! 평가 매칭을 기달려주세요!`,
-        `- PR 제출 기간: ${subject.asOfDate} ~ ${subject.dueDate}`,
-        `- PR 제출 시각: ${pr.created_at}`,
-        `- PR 마지막 업데이트 시각: ${pr.updated_at}`,
+        `- PR 제출 기간: ${toLocalString(subject.asOfDate)} ~ ${toLocalString(subject.dueDate)}`,
+        `- PR 제출 시각: ${toLocalString(pr.created_at)}`,
+        `- PR 마지막 업데이트 시각: ${toLocalString(pr.updated_at)}`,
       ].join("\n")
     );
   } catch (error) {
