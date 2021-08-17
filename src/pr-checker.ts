@@ -25,12 +25,12 @@ export const run = async () => {
     const updateDate = new Date(data.updated_at);
 
     if (dueDate <= updateDate) {
-      addLabels(client, prNumber, ["over-due-date"]);
+      await addLabels(client, prNumber, ["over-due-date"]);
     } else {
-      addLabels(client, prNumber, ["over-due-date-passed"]);
+      await addLabels(client, prNumber, ["over-due-date-passed"]);
     }
 
-    addComment(
+    await addComment(
       client,
       prNumber,
       [
