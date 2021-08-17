@@ -1,0 +1,15 @@
+name: "@42js/pr-checker"
+description: "@42js/piscine PR check github action 입니다."
+author: "JaeSeoKim <jaeskim@student.42seoul.kr>"
+
+inputs:
+  repo-token:
+    description: "The GITHUB_TOKEN secret"
+    required: true
+  due-date:
+    description: "PR 마감 시간"
+    required: true
+
+runs:
+  using: "node12"
+  main: "dist/index.js"

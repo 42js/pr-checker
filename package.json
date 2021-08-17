@@ -1,0 +1,36 @@
+{
+  "name": "pr-checker",
+  "version": "0.0.1",
+  "description": "@42js/piscine PR check github action 입니다.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && ncc build lib/main.js",
+    "format": "prettier --write \"**/*.ts\"",
+    "format-check": "prettier --check \"**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
+  "keywords": [
+    "github",
+    "action",
+    "42js",
+    "piscine"
+  ],
+  "author": "JaeSeoKim",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.4.0",
+    "@actions/github": "^5.0.0",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^3.0.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.6.1",
+    "@vercel/ncc": "^0.29.1",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.3.5"
+  }
+}
