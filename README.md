@@ -21,4 +21,6 @@ jobs:
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: ".github/conf.yml"
+          currect-label: "✅ 정상적인 제출"
+          wrong-label: "❌ 비정상적인 제출"
 ```
