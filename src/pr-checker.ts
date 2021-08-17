@@ -30,7 +30,7 @@ export const run = async () => {
       addLabels(client, prNumber, ["over-due-date-passed"]);
     }
 
-    addCommnent(
+    addComment(
       client,
       prNumber,
       [
@@ -54,7 +54,7 @@ export const getPrNumber = () => {
   }
 };
 
-export const addCommnent = async (
+export const addComment = async (
   client: IGtihubClient,
   prNumber: number,
   body: string
