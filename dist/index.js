@@ -62,17 +62,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.addLabels = exports.getPrNumber = exports.run = void 0;
+exports.addLabels = exports.addComment = exports.getPrNumber = exports.run = void 0;
 var core = __importStar(__nccwpck_require__(186));
 var github = __importStar(__nccwpck_require__(438));
 var run = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var token, dueDateValue, prNumber, client, data, error_1;
+    var token, dueDate, prNumber, client, pr, createDate, updateDate, comment, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
+                _a.trys.push([0, 7, , 8]);
                 token = core.getInput("repo-token", { required: true });
-                dueDateValue = core.getInput("due-date", { required: true });
+                dueDate = new Date(core.getInput("due-date", { required: true }));
                 prNumber = exports.getPrNumber();
                 if (!prNumber) {
                     throw new Error("No PR number provided");
@@ -84,20 +84,34 @@ var run = function () { return __awaiter(void 0, void 0, void 0, function () {
                         pull_number: prNumber,
                     })];
             case 1:
-                data = (_a.sent()).data;
-                if (new Date(dueDateValue) <= new Date(data.updated_at)) {
-                    exports.addLabels(client, prNumber, ["over-due-date"]);
-                }
-                else {
-                    exports.addLabels(client, prNumber, ["over-due-date-passed"]);
-                }
-                return [3 /*break*/, 3];
+                pr = (_a.sent()).data;
+                createDate = new Date(pr.created_at);
+                updateDate = new Date(pr.updated_at);
+                if (!(dueDate <= updateDate)) return [3 /*break*/, 3];
+                return [4 /*yield*/, exports.addLabels(client, prNumber, ["over-due-date"])];
             case 2:
+                _a.sent();
+                return [3 /*break*/, 5];
+            case 3: return [4 /*yield*/, exports.addLabels(client, prNumber, ["over-due-date-passed"])];
+            case 4:
+                _a.sent();
+                _a.label = 5;
+            case 5: return [4 /*yield*/, exports.addComment(client, prNumber, [
+                    !!pr.user && "\uD83D\uDC4B \uC548\uB155\uD558\uC138\uC694! " + pr.user.login + "\uB2D8!",
+                    "* PR \uC81C\uCD9C \uC2DC\uAC01: " + createDate.toLocaleString(),
+                    "* PR \uB9C8\uC9C0\uB9C9 \uC5C5\uB370\uC774\uD2B8 \uC2DC\uAC01: " + updateDate.toLocaleString(),
+                    "* PR \uB9C8\uAC10 \uC2DC\uAC04: " + dueDate.toLocaleString(),
+                ].join("\n"))];
+            case 6:
+                comment = _a.sent();
+                core.info("PR #" + prNumber + " create " + comment.url);
+                return [3 /*break*/, 8];
+            case 7:
                 error_1 = _a.sent();
                 core.error(error_1);
                 core.setFailed(error_1.message);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
@@ -109,6 +123,23 @@ var getPrNumber = function () {
     }
 };
 exports.getPrNumber = getPrNumber;
+var addComment = function (client, prNumber, body) { return __awaiter(void 0, void 0, void 0, function () {
+    var data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, client.rest.issues.createComment({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: prNumber,
+                    body: body,
+                })];
+            case 1:
+                data = (_a.sent()).data;
+                return [2 /*return*/, data];
+        }
+    });
+}); };
+exports.addComment = addComment;
 var addLabels = function (client, prNumber, labels) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {

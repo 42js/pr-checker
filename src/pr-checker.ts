@@ -15,16 +15,14 @@ export const run = async () => {
 
     const client = github.getOctokit(token);
 
-    const { data } = await client.rest.pulls.get({
+    const { data: pr } = await client.rest.pulls.get({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       pull_number: prNumber,
     });
 
-    core.info(`PR #${prNumber} create ${data.comments_url}`);
-
-    const createDate = new Date(data.created_at);
-    const updateDate = new Date(data.updated_at);
+    const createDate = new Date(pr.created_at);
+    const updateDate = new Date(pr.updated_at);
 
     if (dueDate <= updateDate) {
       await addLabels(client, prNumber, ["over-due-date"]);
@@ -32,16 +30,17 @@ export const run = async () => {
       await addLabels(client, prNumber, ["over-due-date-passed"]);
     }
 
-    await addComment(
+    const comment = await addComment(
       client,
       prNumber,
       [
-        !!data.user && `👋 안녕하세요! ${data.user.login}님!`,
+        !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
         `* PR 제출 시각: ${createDate.toLocaleString()}`,
         `* PR 마지막 업데이트 시각: ${updateDate.toLocaleString()}`,
         `* PR 마감 시간: ${dueDate.toLocaleString()}`,
       ].join("\n")
     );
+    core.info(`PR #${prNumber} create ${comment.url}`);
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
