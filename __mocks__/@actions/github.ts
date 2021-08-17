@@ -1,3 +1,5 @@
+const fs = jest.requireActual("fs");
+
 export const context = {
   payload: {
     pull_request: {
@@ -15,11 +17,17 @@ const mockApi = {
     issues: {
       addLabels: jest.fn(),
       removeLabel: jest.fn(),
-      createComment: jest.fn().mockResolvedValue({ data: {} }),
+      createComment: jest.fn().mockReturnValue({
+        data: {},
+      }),
     },
     pulls: {
       get: jest.fn().mockResolvedValue({
-        data: {},
+        data: {
+          user: {
+            id: 42,
+          },
+        },
       }),
       listFiles: {
         endpoint: {
@@ -28,7 +36,19 @@ const mockApi = {
       },
     },
     repos: {
-      getContent: jest.fn(),
+      getContent: jest.fn().mockResolvedValue({
+        data: {
+          content: fs.readFileSync("__tests__/fixtures/sample_beta.yml"),
+          encoding: "utf8",
+        },
+      }),
+    },
+    teams: {
+      listMembersInOrg: {
+        endpoint: {
+          merge: jest.fn().mockReturnValue({}),
+        },
+      },
     },
   },
   paginate: jest.fn(),

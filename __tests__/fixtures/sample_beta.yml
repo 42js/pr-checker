@@ -1,0 +1,12 @@
+target:
+  team_slug: "@42js/piscine"
+
+subjects:
+  js00:
+    glob: "js00/*"
+    asOfDate: "2021-08-17T19:15:00.000+09:00"
+    dueDate: "2021-08-17T20:15:00.000+09:00"
+  js01:
+    glob: "js01/*"
+    asOfDate: "2021-08-17T19:15:00.000+09:00"
+    dueDate: "2021-08-17T20:15:00.000+09:00"

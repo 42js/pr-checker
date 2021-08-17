@@ -1,4 +1,13 @@
-import { addComment, addLabels, getPrNumber, run } from "../src/pr-checker";
+import {
+  addComment,
+  addLabels,
+  getChnageFiles,
+  getContent,
+  getPrNumber,
+  isTeamMember,
+  removeLabel,
+  run,
+} from "../src/pr-checker";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
@@ -16,8 +25,17 @@ describe("pr-check", () => {
 
     const getOctokitMock = jest.spyOn(github, "getOctokit");
 
+    const paginateMock = jest.spyOn(gh, "paginate");
+    paginateMock.mockResolvedValue([
+      {
+        id: 42,
+        filename: "js00/test.js",
+      },
+    ]);
+
     const getPullsMock = jest.spyOn(gh.rest.pulls, "get");
     const addLabelsMock = jest.spyOn(gh.rest.issues, "addLabels");
+    const removeLabelMock = jest.spyOn(gh.rest.issues, "removeLabel");
     const addCommentMock = jest.spyOn(gh.rest.issues, "createComment");
 
     await run();
@@ -26,6 +44,7 @@ describe("pr-check", () => {
 
     expect(getPullsMock).toBeCalledTimes(1);
     expect(addLabelsMock).toBeCalledTimes(1);
+    expect(removeLabelMock).toBeCalledTimes(0);
     expect(addCommentMock).toBeCalledTimes(1);
 
     expect(errorMock).toBeCalledTimes(0);
@@ -60,6 +79,51 @@ describe("pr-check", () => {
       repo: github.context.repo.repo,
       issue_number: 42,
       body: "test",
+    });
+  });
+
+  it("test getConfig()", async () => {
+    expect(await getContent(gh, "")).toBe(await getContent(gh, ""));
+  });
+
+  it("test getContent()", async () => {
+    const getContentMock = jest.spyOn(gh.rest.repos, "getContent");
+    await getContent(gh, "");
+    expect(getContentMock).toBeCalledTimes(1);
+  });
+
+  it("test isTeamMember()", async () => {
+    const paginateMock = jest.spyOn(gh, "paginate");
+    paginateMock.mockResolvedValue([
+      {
+        id: 42,
+      },
+    ]);
+
+    expect(await isTeamMember(gh, 42, "")).toBe(true);
+  });
+
+  it("test getChnageFiles()", async () => {
+    const paginateMock = jest.spyOn(gh, "paginate");
+    const reuslt = [{ filename: "filelist1" }, { filename: "filelist2" }];
+    paginateMock.mockResolvedValue(reuslt);
+
+    expect(await getChnageFiles(gh, 42)).toStrictEqual(
+      reuslt.map((f) => f.filename)
+    );
+  });
+
+  it("test removeLabel()", async () => {
+    const removeLabelMock = jest.spyOn(gh.rest.issues, "removeLabel");
+
+    await removeLabel(gh, 42, "test");
+
+    expect(removeLabelMock).toBeCalledTimes(1);
+    expect(removeLabelMock).toBeCalledWith({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: 42,
+      name: "test",
     });
   });
 });

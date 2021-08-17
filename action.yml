@@ -6,9 +6,10 @@ inputs:
   repo-token:
     description: "The GITHUB_TOKEN secret"
     required: true
-  due-date:
-    description: "PR 마감 시간"
-    required: true
+  configuration-path:
+    description: "The path for the pr-checker configurations"
+    default: ".github/labeler.yml"
+    required: false
 
 runs:
   using: "node12"

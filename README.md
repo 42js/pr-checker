@@ -15,7 +15,10 @@ jobs:
   norminette_job:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
     - name: pr-checker
-        uses: ...
+        uses: "@42js/pr-checker"
+        uses: 42js/pr-checker@1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: ".github/conf.yml"
 ```
