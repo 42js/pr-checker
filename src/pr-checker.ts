@@ -34,7 +34,7 @@ export const run = async () => {
       client,
       prNumber,
       [
-        !!data.user && `👋 안녕하세요! ${data.user.name}님!`,
+        !!data.user && `👋 안녕하세요! ${data.user.login}님!`,
         `* PR 제출 시각: ${createDate.toLocaleString()}`,
         `* PR 마지막 업데이트 시각: ${updateDate.toLocaleString()}`,
         `* PR 마감 시간: ${dueDate.toLocaleString()}`,
@@ -60,8 +60,7 @@ export const addCommnent = async (
   body: string
 ) => {
   await client.rest.issues.createComment({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
+    ...github.context.repo,
     issue_number: prNumber,
     body: body,
   });
