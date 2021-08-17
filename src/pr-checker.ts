@@ -21,6 +21,8 @@ export const run = async () => {
       pull_number: prNumber,
     });
 
+    core.info(`PR #${prNumber} create ${data.comments_url}`);
+
     const createDate = new Date(data.created_at);
     const updateDate = new Date(data.updated_at);
 
@@ -59,11 +61,13 @@ export const addComment = async (
   prNumber: number,
   body: string
 ) => {
-  await client.rest.issues.createComment({
-    ...github.context.repo,
+  const { data } = await client.rest.issues.createComment({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
     issue_number: prNumber,
-    body: body,
+    body,
   });
+  return data;
 };
 
 export const addLabels = async (
