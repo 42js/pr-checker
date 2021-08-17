@@ -73,9 +73,10 @@ var minimatch_1 = __importDefault(__nccwpck_require__(3973));
 var date_and_time_1 = __importDefault(__nccwpck_require__(869));
 // @ts-ignore
 var ko_1 = __importDefault(__nccwpck_require__(7510));
+var KR_TIME_DIFF = 9 * 60 * 60 * 1000;
 date_and_time_1.default.locale(ko_1.default);
 var toLocalString = function (datetime) {
-    return date_and_time_1.default.format(new Date(datetime), "YYYY-MM-DD HH:mm:ss");
+    return date_and_time_1.default.format(new Date(Date.parse(datetime) + KR_TIME_DIFF), "YYYY-MM-DD HH:mm:ss");
 };
 exports.toLocalString = toLocalString;
 var run = function () { return __awaiter(void 0, void 0, void 0, function () {
