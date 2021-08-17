@@ -4,8 +4,9 @@ import { IGtihubClient } from "./types";
 
 export const run = async () => {
   try {
+    const autor = core.getInput("author", { required: true });
     const token = core.getInput("repo-token", { required: true });
-    const dueDateValue = core.getInput("due-date", { required: true });
+    const dueDate = new Date(core.getInput("due-date", { required: true }));
     // const configPath = core.getInput("configuration-path", { required: true });
 
     const prNumber = getPrNumber();
@@ -21,11 +22,25 @@ export const run = async () => {
       pull_number: prNumber,
     });
 
-    if (new Date(dueDateValue) <= new Date(data.updated_at)) {
+    const createDate = new Date(data.created_at);
+    const updateDate = new Date(data.updated_at);
+
+    if (dueDate <= updateDate) {
       addLabels(client, prNumber, ["over-due-date"]);
     } else {
       addLabels(client, prNumber, ["over-due-date-passed"]);
     }
+
+    addCommnent(
+      client,
+      prNumber,
+      [
+        `👋 안녕하세요! ${autor}님!`,
+        `* PR 제출 시각: ${createDate.toLocaleString()}`,
+        `* PR 마지막 업데이트 시각: ${updateDate.toLocaleString()}`,
+        `* PR 마감 시간: ${dueDate.toLocaleString()}`,
+      ].join("\n")
+    );
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
@@ -38,6 +53,19 @@ export const getPrNumber = () => {
   if (pullRequest) {
     return pullRequest.number;
   }
+};
+
+export const addCommnent = async (
+  client: IGtihubClient,
+  prNumber: number,
+  body: string
+) => {
+  await client.rest.issues.createComment({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    issue_number: prNumber,
+    body: body,
+  });
 };
 
 export const addLabels = async (

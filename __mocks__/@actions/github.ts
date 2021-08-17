@@ -15,6 +15,7 @@ const mockApi = {
     issues: {
       addLabels: jest.fn(),
       removeLabel: jest.fn(),
+      createComment: jest.fn(),
     },
     pulls: {
       get: jest.fn().mockResolvedValue({

@@ -1,4 +1,4 @@
-import { addLabels, getPrNumber, run } from "../src/pr-checker";
+import { addCommnent, addLabels, getPrNumber, run } from "../src/pr-checker";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
@@ -18,6 +18,7 @@ describe("pr-check", () => {
 
     const getPullsMock = jest.spyOn(gh.rest.pulls, "get");
     const addLabelsMock = jest.spyOn(gh.rest.issues, "addLabels");
+    const addCommnentMock = jest.spyOn(gh.rest.issues, "createComment");
 
     await run();
 
@@ -25,6 +26,7 @@ describe("pr-check", () => {
 
     expect(getPullsMock).toBeCalledTimes(1);
     expect(addLabelsMock).toBeCalledTimes(1);
+    expect(addCommnentMock).toBeCalledTimes(1);
 
     expect(errorMock).toBeCalledTimes(0);
     expect(setFailedMock).toBeCalledTimes(0);
@@ -45,6 +47,19 @@ describe("pr-check", () => {
       repo: github.context.repo.repo,
       issue_number: 42,
       labels: ["test"],
+    });
+  });
+
+  it("test addCommnent()", async () => {
+    const addCommnentMock = jest.spyOn(gh.rest.issues, "createComment");
+
+    await addCommnent(gh, 42, "test");
+    expect(addCommnentMock).toBeCalledTimes(1);
+    expect(addCommnentMock).toBeCalledWith({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: 42,
+      body: "test",
     });
   });
 });
