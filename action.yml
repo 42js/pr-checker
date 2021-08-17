@@ -3,10 +3,6 @@ description: "@42js/piscine PR check github action 입니다."
 author: "JaeSeoKim <jaeskim@student.42seoul.kr>"
 
 inputs:
-  author:
-    description: "The name of the action's author."
-    default: "${{ author }}"
-    required: true
   repo-token:
     description: "The GITHUB_TOKEN secret"
     required: true

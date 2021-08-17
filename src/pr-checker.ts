@@ -4,7 +4,6 @@ import { IGtihubClient } from "./types";
 
 export const run = async () => {
   try {
-    const autor = core.getInput("author", { required: true });
     const token = core.getInput("repo-token", { required: true });
     const dueDate = new Date(core.getInput("due-date", { required: true }));
     // const configPath = core.getInput("configuration-path", { required: true });
@@ -35,7 +34,7 @@ export const run = async () => {
       client,
       prNumber,
       [
-        `👋 안녕하세요! ${autor}님!`,
+        !!data.user && `👋 안녕하세요! ${data.user.name}님!`,
         `* PR 제출 시각: ${createDate.toLocaleString()}`,
         `* PR 마지막 업데이트 시각: ${updateDate.toLocaleString()}`,
         `* PR 마감 시간: ${dueDate.toLocaleString()}`,
