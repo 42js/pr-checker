@@ -100,7 +100,7 @@ describe("pr-check", () => {
       },
     ]);
 
-    expect(await isTeamMember(gh, 42, "")).toBe(true);
+    expect(await isTeamMember(gh, 42, "", "")).toBe(true);
   });
 
   it("test getChnageFiles()", async () => {
