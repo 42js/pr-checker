@@ -1,5 +1,6 @@
 target:
   team_slug: "@42js/piscine"
+  team_role: "member"
 
 subjects:
   js00:

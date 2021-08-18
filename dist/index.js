@@ -104,7 +104,7 @@ var run = function () { return __awaiter(void 0, void 0, void 0, function () {
                     })];
             case 2:
                 pr = (_c.sent()).data;
-                if (!exports.isTeamMember(client, pr.user.id, config.target.team_slug)) {
+                if (!exports.isTeamMember(client, pr.user.id, config.target.team_slug, config.target.team_role)) {
                     core.info("PR " + prNumber + ": Not applicable");
                     return [2 /*return*/];
                 }
@@ -267,7 +267,7 @@ var getChnageFiles = function (client, prNumber) { return __awaiter(void 0, void
     });
 }); };
 exports.getChnageFiles = getChnageFiles;
-var isTeamMember = function (client, id, team_slug) { return __awaiter(void 0, void 0, void 0, function () {
+var isTeamMember = function (client, id, team_slug, team_role) { return __awaiter(void 0, void 0, void 0, function () {
     var listMembersInOrgOptions, listMembersInOrgResponse, members, user;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -275,8 +275,7 @@ var isTeamMember = function (client, id, team_slug) { return __awaiter(void 0, v
                 listMembersInOrgOptions = client.rest.teams.listMembersInOrg.endpoint.merge({
                     org: github.context.repo.owner,
                     team_slug: team_slug,
-                    // TODO: 테스트 후 `member` 로 변경 필요
-                    role: "all",
+                    role: team_role,
                 });
                 return [4 /*yield*/, client.paginate(listMembersInOrgOptions)];
             case 1:

@@ -40,7 +40,14 @@ export const run = async () => {
       pull_number: prNumber,
     });
 
-    if (!isTeamMember(client, pr.user!.id, config.target.team_slug)) {
+    if (
+      !isTeamMember(
+        client,
+        pr.user!.id,
+        config.target.team_slug,
+        config.target.team_role
+      )
+    ) {
       core.info(`PR ${prNumber}: Not applicable`);
       return;
     }
@@ -206,14 +213,14 @@ export const getChnageFiles = async (client: IClient, prNumber: number) => {
 export const isTeamMember = async (
   client: IClient,
   id: number,
-  team_slug: string
+  team_slug: string,
+  team_role: string
 ) => {
   const listMembersInOrgOptions =
     client.rest.teams.listMembersInOrg.endpoint.merge({
       org: github.context.repo.owner,
       team_slug: team_slug,
-      // TODO: 테스트 후 `member` 로 변경 필요
-      role: "all",
+      role: team_role,
     });
 
   const listMembersInOrgResponse = await client.paginate(

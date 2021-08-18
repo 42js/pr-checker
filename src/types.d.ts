@@ -11,6 +11,7 @@ export interface ISubject {
 export interface IConfigObject {
   target: {
     team_slug: string;
+    team_role: string;
   };
   subjects: {
     [key: string]: ISubject;
