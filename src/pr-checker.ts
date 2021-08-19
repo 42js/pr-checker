@@ -152,17 +152,17 @@ export const run = async () => {
       return;
     }
 
-    await addLabels(client, prNumber, [subjects[0], currectLabel]);
-
     if (pr.labels.find((label) => label.name === wrongLabel)) {
       removeLabel(client, prNumber, wrongLabel);
     }
 
-    for (const label of Object.values(REASON)) {
-      if (pr.labels.find((label) => label.name === label)) {
-        removeLabel(client, prNumber, label);
+    for (const reason of Object.values(REASON)) {
+      if (pr.labels.find((label) => label.name === reason)) {
+        removeLabel(client, prNumber, reason);
       }
     }
+
+    await addLabels(client, prNumber, [subjects[0], currectLabel]);
 
     await addComment(
       client,
