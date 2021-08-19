@@ -109,7 +109,7 @@ export const run = async () => {
       return;
     }
 
-    await addLabels(client, prNumber, [subjects[0], currectLabel]);
+    await addLabels(client, prNumber, [subjects[0]]);
 
     const subject = config.subjects[subjects[0]];
 
@@ -163,6 +163,8 @@ export const run = async () => {
         removeLabel(client, prNumber, reason);
       }
     }
+
+    await addLabels(client, prNumber, [currectLabel]);
 
     await addComment(
       client,
