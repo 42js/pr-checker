@@ -109,6 +109,8 @@ export const run = async () => {
       return;
     }
 
+    await addLabels(client, prNumber, [subjects[0], currectLabel]);
+
     const subject = config.subjects[subjects[0]];
 
     if (Date.parse(subject.asOfDate) > Date.now()) {
@@ -161,8 +163,6 @@ export const run = async () => {
         removeLabel(client, prNumber, reason);
       }
     }
-
-    await addLabels(client, prNumber, [subjects[0], currectLabel]);
 
     await addComment(
       client,
