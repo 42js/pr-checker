@@ -153,6 +153,12 @@ jobs:
                       `- 만약 리뷰를 받고 싶은 경우 주변 동료 분들께 개인적으로 리뷰를 요청해서 진행하여 주세요!`,
                     ].join("\n"),
                   });
+                  await github.pulls.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    state: "closed",
+                  });
                 }
               }
             }
