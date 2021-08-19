@@ -22,7 +22,7 @@ subjects:
   # 해당 오브젝트의 키는 subject를 나타내는 라벨로도 사용이 됩니다.
   js00:
     # 서브젝트의 제출 파일의 범위를 `glob` 형태로 정의 합니다.
-    glob: "js00/*"
+    glob: "js00/**/*"
     # 제출 시작 시간을 정의 합니다.
     asOfDate: "2021-08-17T19:15:00.000+09:00"
     # 제출 마감 시간을 정의 합니다.
@@ -84,6 +84,10 @@ on:
         description: 정상적인 제출 확인용 라벨
         required: true
         default: "✅ 정상적인 제출"
+      wrong-label:
+        description: 비정상적인 제출 확인용 라벨
+        required: true
+        default: "❌ 비정상적인 제출"
       reviewer:
         description: 리뷰어로 지정될 팀명
         required: true
@@ -98,17 +102,19 @@ jobs:
         with:
           github-token: ${{ secrets.SECRET_PAT }}
           script: |
-            const prlistConfig = github.pulls.list.endpoint.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            const prList = await github.paginate(prlistConfig);
-            for (const pr of prList) {
+          const prlistConfig = github.pulls.list.endpoint.merge({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          const prList = await github.paginate(prlistConfig);
+          for (const pr of prList) {
+            if (
+              pr.state === "open" &&
+              !!pr.labels.find(
+                (label) => label.name === "${{ github.event.inputs.subject }}"
+              )
+            ) {
               if (
-                pr.state === "open" &&
-                !!pr.labels.find(
-                  (label) => label.name === "${{ github.event.inputs.subject }}"
-                ) &&
                 !!pr.labels.find(
                   (label) => label.name === "${{ github.event.inputs.currect-label }}"
                 )
@@ -123,15 +129,31 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                body : [
-                        `- 🎉 평가 매칭이 되셨습니다! 리뷰어를 확인후 아래의 주의 사항을 확인하여 진행 해주세요!`,
-                        `- ⚠️ 평가시 주의 사항`,
-                        `  - 본과정과 동일 하게 위에서 틀린 경우 그 즉시 평가점수 부여는 멈춰야 합니다.`,
-                        `  - 평가를 진행 할때 PR의 CodeReview 기능을 이용해서 \`approve\`로 리뷰를 남겨주세요.`,
-                        `  - \`comment\` 로 작성하여 남겨주시면 스탭분들이 확인하는데 어려움을 격습니다 ㅠㅠ`,
-                        `  - PR 리뷰에 구글 폼 제출 후 나오는 점수 결과를 꼭 같이 제출 하여주세요!`,
-                      ].join("\n"),
+                  body: [
+                    `🎉 평가 매칭이 되셨습니다! 리뷰어를 확인후 아래의 주의 사항을 확인하여 진행 해주세요!`,
+                    `- ⚠️ 평가시 주의 사항`,
+                    `  - 본과정과 동일 하게 위에서 틀린 경우 그 즉시 평가점수 부여는 멈춰야 합니다.`,
+                    `  - 평가를 진행 할때 PR의 CodeReview 기능을 이용해서 \`approve\`로 리뷰를 남겨주세요.`,
+                    `  - \`comment\` 로 작성하여 남겨주시면 스탭분들이 확인하는데 어려움을 격습니다 ㅠㅠ`,
+                    `  - PR 리뷰에 구글 폼 제출 후 나오는 점수 결과를 꼭 같이 제출 하여주세요!`,
+                  ].join("\n"),
+                });
+              } else if (
+                !!pr.labels.find(
+                  (label) => label.name === "${{ github.event.inputs.wrong-label }}"
+                )
+              ) {
+                await github.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: [
+                    `😭 안타깝지만 제출 기간내에 정상적으로 제출이 되지 않아서 0점으로 처리 됩니다.`,
+                    `- 정상적으로 처리가 되지 않는 경우에는 \`#team_qna\` 에 문의 해주세요!`,
+                    `- 만약 리뷰를 받고 싶은 경우 주변 동료 분들께 개인적으로 리뷰를 요청해서 진행하여 주세요!`,
+                  ].join("\n"),
                 });
               }
             }
+          }
 ```

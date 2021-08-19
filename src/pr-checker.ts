@@ -77,7 +77,7 @@ export const run = async () => {
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
-          `- Subject에 관련되지 않은 PR를 제출 하셨습니다.`,
+          ` - Subject에 관련되지 않은 PR를 제출 하셨습니다.`,
         ].join("\n")
       );
       core.info(`PR ${prNumber}: wrong submission (path)`);
@@ -147,6 +147,10 @@ export const run = async () => {
 
     await addLabels(client, prNumber, [subjects[0], currectLabel]);
 
+    if (pr.labels.find((label) => label.name === wrongLabel)) {
+      removeLabel(client, prNumber, wrongLabel);
+    }
+
     await addComment(
       client,
       prNumber,
@@ -178,7 +182,6 @@ export const wrongSubmission = async (
   }
   await addLabels(client, prNumber, labels);
   await addComment(client, prNumber, body);
-  await closePR(client, prNumber);
 };
 
 export const closePR = async (client: IClient, prNumber: number) => {
