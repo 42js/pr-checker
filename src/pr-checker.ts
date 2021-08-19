@@ -18,6 +18,13 @@ export const toLocalString = (datetime: string): string => {
   );
 };
 
+const REASON = {
+  TOO_MANY_SUBMISSIONS: "too-many-submissions",
+  WRONG_PATH: "wrong-path",
+  EARLY_SUBMISSION: "early-submission",
+  LATE_SUBMISSION: "late-submission",
+};
+
 export const run = async () => {
   try {
     const token = core.getInput("repo-token", { required: true });
@@ -73,7 +80,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        [wrongLabel, "wrong-path"],
+        [wrongLabel, REASON.WRONG_PATH],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
@@ -88,7 +95,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        [wrongLabel, "too-many-submissions"],
+        [wrongLabel, REASON.TOO_MANY_SUBMISSIONS],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
@@ -108,7 +115,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        [wrongLabel, "early-submission"],
+        [wrongLabel, REASON.EARLY_SUBMISSION],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
@@ -128,7 +135,7 @@ export const run = async () => {
       await wrongSubmission(
         client,
         prNumber,
-        [wrongLabel, "late-submission"],
+        [wrongLabel, REASON.LATE_SUBMISSION],
         removeLabels,
         [
           !!pr.user && `👋 안녕하세요! ${pr.user.login}님!`,
@@ -149,6 +156,12 @@ export const run = async () => {
 
     if (pr.labels.find((label) => label.name === wrongLabel)) {
       removeLabel(client, prNumber, wrongLabel);
+    }
+
+    for (const label of Object.values(REASON)) {
+      if (pr.labels.find((label) => label.name === label)) {
+        removeLabel(client, prNumber, label);
+      }
     }
 
     await addComment(
